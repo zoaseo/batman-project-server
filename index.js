@@ -30,7 +30,7 @@ app.get('/first', async (req, res)=> {
 })
 app.get('/second', async (req, res)=> {
     connection.query(
-        "select * from characters where series like '%1%'",
+        "select * from characters where series like '%2%'",
         (err, rows, fields)=> {
             res.send(rows)
         }
@@ -38,13 +38,37 @@ app.get('/second', async (req, res)=> {
 })
 app.get('/third', async (req, res)=> {
     connection.query(
-        "select * from characters where series like '%1%'",
+        "select * from characters where series like '%3%'",
         (err, rows, fields)=> {
             res.send(rows)
         }
     )
 })
 
+// 상세보기
+app.get('/detailview/:id', async (req,res)=>{
+    const params = req.params;
+    const { id } = params;
+    connection.query(
+        `select imgsrc, actor, role, description from characters where id=${id}`,
+        (err, rows, fields)=>{
+            res.send(rows[0]);
+        }
+    )
+})
+
+// 캐릭터 삭제
+app.delete('/delCharacter/:id', async (req,res)=>{
+    const params = req.params;
+    const { id } = params;
+    console.log("삭제");
+    connection.query(
+        `delete from characters where id=${id}`,
+        (err, rows, fields)=>{
+            res.send(rows);
+        }
+    )
+})
 
 // 서버실행
 app.listen(port, () => {
