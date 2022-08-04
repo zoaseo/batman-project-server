@@ -19,7 +19,7 @@ const connection = mysql.createConnection({
 app.use(express.json());
 app.use(cors());
 
-// 페이지 불러오기
+// 캐릭터 페이지 불러오기
 app.get('/first', async (req, res)=> {
     connection.query(
         "select * from characters where series like '%1%'",
@@ -45,12 +45,12 @@ app.get('/third', async (req, res)=> {
     )
 })
 
-// 상세보기
+// 캐릭터 상세보기
 app.get('/detailview/:id', async (req,res)=>{
     const params = req.params;
     const { id } = params;
     connection.query(
-        `select imgsrc, actor, role, description from characters where id=${id}`,
+        `select imgsrc2, actor, role, description from characters where id=${id}`,
         (err, rows, fields)=>{
             res.send(rows[0]);
         }
@@ -66,6 +66,90 @@ app.delete('/delCharacter/:id', async (req,res)=>{
         `delete from characters where id=${id}`,
         (err, rows, fields)=>{
             res.send(rows);
+        }
+    )
+})
+
+// 로그인
+app.get('/getId/:id', async (req,res)=>{
+    const params = req.params;
+    const { id } = params;
+    connection.query(
+        `select userId from users where userId='${id}'`,
+        (err, rows, fields)=>{
+            res.send(rows);
+        }
+    )
+})
+app.get('/getPw/:id', async (req,res)=>{
+    const params = req.params;
+    const { id } = params;
+    connection.query(
+        `select password from users where userId='${id}'`,
+        (err, rows, fields)=>{
+            res.send(rows);
+        }
+    )
+})
+
+// 로그인 id 중복확인
+app.get('/idCh', async (req,res)=>{
+    connection.query(
+        "select userId from users",
+        (err, rows, fields)=> {
+            res.send(rows)
+        }
+    )
+})
+
+// 회원가입
+app.post('/join', async (req,res)=>{
+    const body = req.body;
+    const { id, name, phone, email, add, adddetail, password } = body;
+    const query = "INSERT INTO users(userId, userName, phone, email, address, adddetail, password) values(?,?,?,?,?,?,?)";
+    connection.query(
+                    query, 
+                    [id, name, phone, email, add, adddetail, password], 
+                    (err, rows, fields) => {
+                        res.send(err);
+                    });
+
+})
+
+// 굿즈 페이지 불러오기
+app.get('/goods1', async (req, res)=> {
+    connection.query(
+        "select * from goods where part = '1'",
+        (err, rows, fields)=> {
+            res.send(rows)
+        }
+    )
+})
+app.get('/goods2', async (req, res)=> {
+    connection.query(
+        "select * from goods where part = '2'",
+        (err, rows, fields)=> {
+            res.send(rows)
+        }
+    )
+})
+app.get('/goods3', async (req, res)=> {
+    connection.query(
+        "select * from goods where part = '3'",
+        (err, rows, fields)=> {
+            res.send(rows)
+        }
+    )
+})
+
+// 굿즈 상세보기
+app.get('/detailview2/:id', async (req,res)=>{
+    const params = req.params;
+    const { id } = params;
+    connection.query(
+        `select * from goods where id=${id}`,
+        (err, rows, fields)=>{
+            res.send(rows[0]);
         }
     )
 })
