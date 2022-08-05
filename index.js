@@ -154,6 +154,74 @@ app.get('/detailview2/:id', async (req,res)=>{
     )
 })
 
+// 굿즈 삭제
+app.delete('/delGoods/:id', async (req,res)=>{
+    const params = req.params;
+    const { id } = params;
+    console.log("삭제");
+    connection.query(
+        `delete from goods where id=${id}`,
+        (err, rows, fields)=>{
+            res.send(rows);
+        }
+    )
+})
+
+// 굿즈 수정
+app.put('/editgoods/:id', async (req,res)=>{
+    // 파라미터 값을 가지고 있는 객체
+    const params = req.params;
+    const { id } = params;
+    const body = req.body;
+    const { c_proimgsrc, c_proname, c_prodescript, c_price, c_part } = body;
+    connection.query(
+        `update goods
+        set proimgsrc='${c_proimgsrc}', proname='${c_proname}', prodescript='${c_prodescript}', price='${c_price}', part='${c_part}'
+        where id = ${id}`,
+        (err, rows, fields)=>{
+            res.send(rows);
+        }
+    )
+})
+
+// 장바구니
+app.get('/mypage/:idid', async (req,res)=>{
+    const params = req.params;
+    const { idid } = params;
+    connection.query(
+        `select * from pack where user_id='${idid}'`,
+        (err, rows, fields)=>{
+            res.send(rows);
+        }
+    )
+})
+
+// 장바구니에 추가
+app.put('/addReservation', async (req,res)=>{
+    const body = req.body;
+    const {c_user_id, c_user_name, c_user_imgsrc, c_user_count, c_user_price} = body;
+    connection.query(
+        "insert into pack( user_id, user_name, user_imgsrc, user_count, user_price) values(?,?,?,?,?)",
+        [c_user_id, c_user_name, c_user_imgsrc, c_user_count, c_user_price],
+        (err, rows, fields)=>{
+            res.send(rows);
+        }
+    )
+})
+
+// 장바구니에 삭제
+app.delete('/delReservation/:id', async (req,res)=>{
+    const params = req.params;
+    const { id } = params;
+    console.log("삭제");
+    connection.query(
+        `delete from pack where id=${id}`,
+        (err, rows, fields)=>{
+            res.send(rows);
+        }
+    )
+})
+
 // 서버실행
 app.listen(port, () => {
     console.log("서버가 돌아가고 있습니다.")
