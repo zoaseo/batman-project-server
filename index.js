@@ -7,6 +7,9 @@ const mysql = require("mysql");
 const fs = require("fs")
 const dbinfo = fs.readFileSync('./database.json');
 const conf = JSON.parse(dbinfo);
+const multer = require("multer");
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 const connection = mysql.createConnection({
     host: conf.host,
@@ -18,6 +21,44 @@ const connection = mysql.createConnection({
 
 app.use(express.json());
 app.use(cors());
+app.use("/upload",express.static("upload"));
+
+// 이미지 업로드
+// gallery 포스트 요청시
+app.post("/insert", async (req,res) => {
+    const { c_proname, c_proimgsrc, c_prodescript, c_price, c_part } = req.body;
+    connection.query("insert into goods(`proname`,`proimgsrc`,`prodescript`,`price`,`part`) values(?,?,?,?,?)",
+    [c_proname, c_proimgsrc, c_prodescript, c_price, c_part],
+    (err, result, fields)=>{
+        res.send('등록되었습니다.');
+    })
+})
+// gallery 겟 요청시
+app.get("/insert", async (req,res) => {
+    connection.query("select * from goods",
+    (err, result, fields)=>{
+        res.send(result)
+    })
+})
+
+// 파일 요청시 파일이 저장될 경로와 파일이름(요청된 원본 파일이름) 지정
+const storage = multer.diskStorage({
+    destination: "./upload",
+    filename: function(req, file, cb){
+        cb(null, file.originalname);
+    }
+})
+// 업로드 객체
+const upload = multer({
+    storage:storage,
+    limits: {fieldSize: 1000000}
+})
+// upload경로로 포스트 요청이 왔을 때 응답
+app.post("/upload", upload.single("c_proimgsrc"), function(req, res, next){
+    res.send({
+        imageUrl: req.file.filename
+    })
+})
 
 // 캐릭터 페이지 불러오기
 app.get('/first', async (req, res)=> {
@@ -70,17 +111,17 @@ app.delete('/delCharacter/:id', async (req,res)=>{
     )
 })
 
-// 로그인
-app.get('/getId/:id', async (req,res)=>{
-    const params = req.params;
-    const { id } = params;
-    connection.query(
-        `select userId from users where userId='${id}'`,
-        (err, rows, fields)=>{
-            res.send(rows);
-        }
-    )
-})
+// // 로그인
+// app.get('/getId/:id', async (req,res)=>{
+//     const params = req.params;
+//     const { id } = params;
+//     connection.query(
+//         `select userId from users where userId='${id}'`,
+//         (err, rows, fields)=>{
+//             res.send(rows);
+//         }
+//     )
+// })
 app.get('/getPw/:id', async (req,res)=>{
     const params = req.params;
     const { id } = params;
@@ -102,18 +143,72 @@ app.get('/idCh', async (req,res)=>{
     )
 })
 
-// 회원가입
-app.post('/join', async (req,res)=>{
-    const body = req.body;
-    const { id, name, phone, email, add, adddetail, password } = body;
-    const query = "INSERT INTO users(userId, userName, phone, email, address, adddetail, password) values(?,?,?,?,?,?,?)";
-    connection.query(
-                    query, 
-                    [id, name, phone, email, add, adddetail, password], 
-                    (err, rows, fields) => {
-                        res.send(err);
-                    });
+// // 회원가입
+// app.post('/join', async (req,res)=>{
+//     const body = req.body;
+//     const { id, name, phone, email, add, adddetail, password } = body;
+//     const query = "INSERT INTO users(userId, userName, phone, email, address, adddetail, password) values(?,?,?,?,?,?,?)";
+//     connection.query(
+//                     query, 
+//                     [id, name, phone, email, add, adddetail, password], 
+//                     (err, rows, fields) => {
+//                         res.send(err);
+//                     })
 
+// })
+// 회원가입
+app.post("/join", async (req, res)=>{
+    let myPlaintextPass = req.body.password;
+    let myPass = "";
+    if(myPlaintextPass != '' && myPlaintextPass != undefined){
+        bcrypt.genSalt(saltRounds, function(err, salt) {
+            bcrypt.hash(myPlaintextPass, salt, function(err, hash) {
+                // Store hash in your password DB.
+                myPass = hash;
+                console.log(myPass);
+                // 쿼리 작성
+                const {userId, userName, phone, email, address, adddetail} = req.body;
+                connection.query("insert into users(userId, userName, phone, email, address, adddetail, password) values(?,?,?,?,?,?,?)",
+                    [userId, userName, phone, email, address, adddetail, myPass],
+                    (err, result, fields) => {
+                        console.log(result)
+                        console.log(err)
+                        res.send("등록되었습니다.")
+                    }
+                )
+            });
+        });
+    }
+})
+// 로그인
+app.post('/login', async (req, res)=> {
+    // userId 값에 일치하는 데이터가 있는지 select문
+    // password 암호화해서 쿼리 결과의 패스워드랑 일치하는지를 체크
+    const { userId, password } = req.body;
+    console.log(userId);
+    console.log(password);
+    connection.query(`select * from batman.users where userId = '${userId}'`,
+        (err, rows, fields)=>{
+            console.log(err);
+            if(rows != undefined){
+                if(rows[0] == undefined){
+                    res.send(null)
+                }else {
+                    // Load hash from your password DB.
+                    bcrypt.compare(password, rows[0].password, function(err, result) {
+                        // result == true
+                        if(rows[0]){
+                            res.send(rows[0])
+                        }else {
+                            res.send("실패")
+                        }
+                    });
+                }
+            }else {
+                res.send(null)
+            }
+        }
+    )
 })
 
 // 굿즈 페이지 불러오기
