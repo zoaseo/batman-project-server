@@ -316,6 +316,25 @@ app.delete('/delReservation/:id', async (req,res)=>{
         }
     )
 })
+// search 부분 
+app.get('/search/:input', async (req,res)=>{
+    const params = req.params;
+    const { input } = params;
+    connection.query(
+        `select * from characters where actor like '%${input}%' or role like '%${input}%'`,
+        (err, rows, fields)=>{
+            res.send(rows);
+        }
+    )
+})
+app.get('/allc', async (req, res)=> {
+    connection.query(
+        "select * from characters ",
+        (err, rows, fields)=> {
+            res.send(rows)
+        }
+    )
+})
 
 // 서버실행
 app.listen(port, () => {
