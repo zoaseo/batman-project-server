@@ -316,6 +316,34 @@ app.delete('/delReservation/:id', async (req,res)=>{
         }
     )
 })
+// 장바구니 물품 수정 수량 가격 받아오기
+app.get('/countprice/:id', async (req,res)=>{
+    const params = req.params;
+    const { id } = params;
+    connection.query(
+        `select user_count, user_price from pack where id='${id}'`,
+        (err, rows, fields)=>{
+            res.send(rows[0]);
+        }
+    )
+})
+// 장바구니 물품 수정
+app.put('/editpack/:id', async (req,res)=>{
+    // 파라미터 값을 가지고 있는 객체
+    const params = req.params;
+    const { id } = params;
+    const body = req.body;
+    const { c_user_count,  c_user_pay } = body;
+    connection.query(
+        `update pack
+        set user_count='${c_user_count}', user_pay='${c_user_pay}'
+        where id = ${id}`,
+        (err, rows, fields)=>{
+            res.send(rows);
+        }
+    )
+})
+
 // search 부분 
 app.get('/search/:input', async (req,res)=>{
     const params = req.params;
@@ -324,14 +352,6 @@ app.get('/search/:input', async (req,res)=>{
         `select * from characters where actor like '%${input}%' or role like '%${input}%'`,
         (err, rows, fields)=>{
             res.send(rows);
-        }
-    )
-})
-app.get('/allc', async (req, res)=> {
-    connection.query(
-        "select * from characters ",
-        (err, rows, fields)=> {
-            res.send(rows)
         }
     )
 })
