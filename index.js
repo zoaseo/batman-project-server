@@ -290,6 +290,18 @@ app.get('/mypage/:idid', async (req,res)=>{
         }
     )
 })
+// 장바구니 총 금액 구하기
+app.get('/total/:idid', async (req,res)=>{
+    const params = req.params;
+    const { idid } = params;
+    connection.query(
+        `select sum(user_pay) as total from pack where user_id='${idid}'`,
+        (err, rows, fields)=>{
+            res.send(rows[0]);
+        }
+    )
+})
+
 
 // 장바구니에 추가
 app.put('/addReservation', async (req,res)=>{
