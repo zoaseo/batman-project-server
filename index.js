@@ -134,7 +134,7 @@ app.get('/getPw/:id', async (req,res)=>{
 })
 
 // 로그인 id 중복확인
-app.get('/idCh', async (req,res)=>{
+app.get('/idCh', (req,res)=>{
     connection.query(
         "select userId from users",
         (err, rows, fields)=> {
@@ -160,6 +160,7 @@ app.get('/idCh', async (req,res)=>{
 app.post("/join", async (req, res)=>{
     let myPlaintextPass = req.body.password;
     let myPass = "";
+    const {userId, userName, phone, email, address, adddetail} = req.body;
     if(myPlaintextPass != '' && myPlaintextPass != undefined){
         bcrypt.genSalt(saltRounds, function(err, salt) {
             bcrypt.hash(myPlaintextPass, salt, function(err, hash) {
@@ -167,15 +168,16 @@ app.post("/join", async (req, res)=>{
                 myPass = hash;
                 console.log(myPass);
                 // 쿼리 작성
-                const {userId, userName, phone, email, address, adddetail} = req.body;
                 connection.query("insert into users(userId, userName, phone, email, address, adddetail, password) values(?,?,?,?,?,?,?)",
-                    [userId, userName, phone, email, address, adddetail, myPass],
-                    (err, result, fields) => {
-                        console.log(result)
-                        console.log(err)
-                        res.send("등록되었습니다.")
-                    }
-                )
+                            [userId, userName, phone, email, address, adddetail, myPass],
+                            (err, rows, fields) => {
+                                // console.log(result)
+                                // console.log(rows)
+                                res.send("등록되었습니다.")
+                            }
+                        )
+                
+                
             });
         });
     }
@@ -308,12 +310,21 @@ app.put('/addReservation', async (req,res)=>{
     const body = req.body;
     const {c_user_id, c_user_name, c_user_imgsrc, c_user_count, c_user_price} = body;
     connection.query(
-        "insert into pack( user_id, user_name, user_imgsrc, user_count, user_price) values(?,?,?,?,?)",
-        [c_user_id, c_user_name, c_user_imgsrc, c_user_count, c_user_price],
+        `select * from pack where user_id='${c_user_id}' and user_name='${c_user_name}'`,
         (err, rows, fields)=>{
-            res.send(rows);
+            if(rows.length == 1){
+                res.send('있음')
+            }else{
+                connection.query(
+                    "insert into pack( user_id, user_name, user_imgsrc, user_count, user_price) values(?,?,?,?,?)",
+                    [c_user_id, c_user_name, c_user_imgsrc, c_user_count, c_user_price],
+                    (err, rows, fields)=>{
+                        res.send(rows);
+                    }
+                )
+            }
         }
-    )
+    )  
 })
 
 // 장바구니에 삭제
