@@ -199,7 +199,7 @@ app.post('/login', async (req, res)=> {
                     // Load hash from your password DB.
                     bcrypt.compare(password, rows[0].password, function(err, result) {
                         // result == true
-                        if(rows == true){
+                        if(rows[0]){
                             res.send(rows[0])
                         }else {
                             res.send("실패")
