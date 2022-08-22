@@ -5,11 +5,14 @@ const app = express();
 const port = process.env.PORT || 3001;
 const mysql = require("mysql");
 const fs = require("fs")
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 const dbinfo = fs.readFileSync('./database.json');
 const conf = JSON.parse(dbinfo);
 const multer = require("multer");
-const bcrypt = require('bcrypt');
-const saltRounds = 10;
+
+
+
 
 const connection = mysql.createConnection({
     host: conf.host,
@@ -122,16 +125,16 @@ app.get('/getId/:id', async (req,res)=>{
         }
     )
 })
-app.get('/getPw/:id', async (req,res)=>{
-    const params = req.params;
-    const { id } = params;
-    connection.query(
-        `select password from users where userId='${id}'`,
-        (err, rows, fields)=>{
-            res.send(rows);
-        }
-    )
-})
+// app.get('/getPw/:id', async (req,res)=>{
+//     const params = req.params;
+//     const { id } = params;
+//     connection.query(
+//         `select password from users where userId='${id}'`,
+//         (err, rows, fields)=>{
+//             res.send(rows);
+//         }
+//     )
+// })
 
 // 로그인 id 중복확인
 app.get('/idCh', (req,res)=>{
@@ -169,15 +172,13 @@ app.post("/join", async (req, res)=>{
                 // 쿼리 작성
                 const {userId, userName, phone, email, address, adddetail} = req.body;
                 connection.query("insert into users(userId, userName, phone, email, address, adddetail, password) values(?,?,?,?,?,?,?)",
-                            [userId, userName, phone, email, address, adddetail, myPass],
-                            (err, rows, fields) => {
-                                // console.log(result)
-                                // console.log(rows)
-                                res.send("등록되었습니다.")
-                            }
-                        )
-                
-                
+                    [userId, userName, phone, email, address, adddetail, myPass],
+                    (err, result, fields) => {
+                        // console.log(result)
+                        // console.log(rows)
+                        res.send("등록되었습니다.")
+                    }
+                )
             });
         });
     }
@@ -191,20 +192,34 @@ app.post('/login', async (req, res)=> {
     console.log(password);
     connection.query(`select * from users where userId = '${userId}'`,
         (err, rows, fields)=>{
-            console.log(err);
             if(rows != undefined){
                 if(rows[0] == undefined){
                     res.send(null)
                 }else {
                     // Load hash from your password DB.
-                    bcrypt.compare(password, rows[0].password, function(err, result) {
-                        // result == true
-                        if(rows[0]){
+                    // bcrypt.compare(password, rows[0].password, function(err, result) {
+                    //     // result == true
+                    //     if(rows[0]){
+                    //         res.send(rows[0])
+                    //         console.log("로그인")
+                    //     }else {
+                    //         res.send("실패")
+                    //     }
+                    // });
+                    bcrypt.compare(password, rows[0].password,function(err,login_flag){
+                        if(login_flag === true){
                             res.send(rows[0])
+                            console.log("이거");
                         }else {
-                            res.send("실패")
+                            res.send(null)
+                            console.log("저거");
+                            console.log(err)
                         }
-                    });
+                        console.log(password)
+                        console.log(rows[0].password)
+                    })
+
+
                 }
             }else {
                 res.send(null)
