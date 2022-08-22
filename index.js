@@ -189,7 +189,7 @@ app.post('/login', async (req, res)=> {
     const { userId, password } = req.body;
     console.log(userId);
     console.log(password);
-    connection.query(`select * from batman.users where userId = '${userId}'`,
+    connection.query(`select * from users where userId = '${userId}'`,
         (err, rows, fields)=>{
             console.log(err);
             if(rows != undefined){
@@ -199,7 +199,7 @@ app.post('/login', async (req, res)=> {
                     // Load hash from your password DB.
                     bcrypt.compare(password, rows[0].password, function(err, result) {
                         // result == true
-                        if(rows[0]){
+                        if(rows == true){
                             res.send(rows[0])
                         }else {
                             res.send("실패")
