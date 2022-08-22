@@ -182,14 +182,16 @@ app.post("/join", async (req, res)=>{
         });
     }
 })
-로그인
+// 로그인
 app.post('/login', async (req, res)=> {
     // userId 값에 일치하는 데이터가 있는지 select문
     // password 암호화해서 쿼리 결과의 패스워드랑 일치하는지를 체크
     const { userId, password } = req.body;
     console.log(userId);
-    connection.query(`select * from batman.users where userId = '${userId}'`,
+    console.log(password);
+    connection.query(`select * from users where userId = '${userId}'`,
         (err, rows, fields)=>{
+            console.log(err);
             if(rows != undefined){
                 if(rows[0] == undefined){
                     res.send(null)
