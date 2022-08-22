@@ -182,59 +182,59 @@ app.post("/join", async (req, res)=>{
         });
     }
 })
-// 로그인
-// app.post('/login', async (req, res)=> {
-//     // userId 값에 일치하는 데이터가 있는지 select문
-//     // password 암호화해서 쿼리 결과의 패스워드랑 일치하는지를 체크
-//     const { userId, password } = req.body;
-//     console.log(userId);
-//     connection.query(`select * from users where userId = '${userId}'`,
-//         (err, rows, fields)=>{
-//             if(rows != undefined){
-//                 if(rows[0] == undefined){
-//                     res.send(null)
-//                 }else {
-//                     // Load hash from your password DB.
-//                     bcrypt.compare(password, rows[0].password, function(err, result) {
-//                         // result == true
-//                         if(rows[0]){
-//                             res.send(rows[0])
-//                         }else {
-//                             res.send("실패")
-//                         }
-//                     });
-//                 }
-//             }else {
-//                 res.send(null)
-//             }
-//         }
-//     )
-// })
-// 로그인 요청
+로그인
 app.post('/login', async (req, res)=> {
-    const {userId, password} = req.body;
+    // userId 값에 일치하는 데이터가 있는지 select문
+    // password 암호화해서 쿼리 결과의 패스워드랑 일치하는지를 체크
+    const { userId, password } = req.body;
+    console.log(userId);
     connection.query(`select * from users where userId = '${userId}'`,
-        (err, rows, fileds)=>{
-            if(rows != undefined) {
-                if(rows[0] == undefined) {
+        (err, rows, fields)=>{
+            if(rows != undefined){
+                if(rows[0] == undefined){
                     res.send(null)
-                } else {
+                }else {
                     // Load hash from your password DB.
                     bcrypt.compare(password, rows[0].password, function(err, result) {
                         // result == true
-                        if(result == true) {
+                        if(rows[0]){
                             res.send(rows[0])
-                        } else {
-                            res.send('실패')
+                        }else {
+                            res.send("실패")
                         }
                     });
                 }
-            } else {
-                res.send('실패')
+            }else {
+                res.send(null)
             }
         }
     )
 })
+// 로그인 요청
+// app.post('/login', async (req, res)=> {
+//     const {userId, password} = req.body;
+//     connection.query(`select * from users where userId = '${userId}'`,
+//         (err, rows, fileds)=>{
+//             if(rows != undefined) {
+//                 if(rows[0] == undefined) {
+//                     res.send(null)
+//                 } else {
+//                     // Load hash from your password DB.
+//                     bcrypt.compare(password, rows[0].password, function(err, result) {
+//                         // result == true
+//                         if(result == true) {
+//                             res.send(rows[0])
+//                         } else {
+//                             res.send('실패')
+//                         }
+//                     });
+//                 }
+//             } else {
+//                 res.send('실패')
+//             }
+//         }
+//     )
+// })
 
 // 굿즈 페이지 불러오기
 app.get('/goods1', async (req, res)=> {
