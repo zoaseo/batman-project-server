@@ -111,17 +111,17 @@ app.delete('/delCharacter/:id', async (req,res)=>{
     )
 })
 
-// // 로그인
-// app.get('/getId/:id', async (req,res)=>{
-//     const params = req.params;
-//     const { id } = params;
-//     connection.query(
-//         `select userId from users where userId='${id}'`,
-//         (err, rows, fields)=>{
-//             res.send(rows);
-//         }
-//     )
-// })
+// 로그인
+app.get('/getId/:id', async (req,res)=>{
+    const params = req.params;
+    const { id } = params;
+    connection.query(
+        `select userId from users where userId='${id}'`,
+        (err, rows, fields)=>{
+            res.send(rows);
+        }
+    )
+})
 app.get('/getPw/:id', async (req,res)=>{
     const params = req.params;
     const { id } = params;
@@ -188,7 +188,7 @@ app.post('/login', async (req, res)=> {
     // password 암호화해서 쿼리 결과의 패스워드랑 일치하는지를 체크
     const { userId, password } = req.body;
     console.log(userId);
-    connection.query(`select * from users where userId = '${userId}'`,
+    connection.query(`select * from batman.users where userId = '${userId}'`,
         (err, rows, fields)=>{
             if(rows != undefined){
                 if(rows[0] == undefined){
