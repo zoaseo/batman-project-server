@@ -335,6 +335,7 @@ app.get('/total/:idid', async (req,res)=>{
 app.put('/addReservation', async (req,res)=>{
     const body = req.body;
     const {c_user_id, c_user_name, c_user_imgsrc, c_user_count, c_user_price} = body;
+    const total = Number(c_user_count) * Number(c_user_price);
     connection.query(
         `select * from pack where user_id='${c_user_id}' and user_name='${c_user_name}'`,
         (err, rows, fields)=>{
@@ -342,8 +343,8 @@ app.put('/addReservation', async (req,res)=>{
                 res.send('있음')
             }else{
                 connection.query(
-                    "insert into pack( user_id, user_name, user_imgsrc, user_count, user_price) values(?,?,?,?,?)",
-                    [c_user_id, c_user_name, c_user_imgsrc, c_user_count, c_user_price],
+                    "insert into pack( user_id, user_name, user_imgsrc, user_count, user_price, user_pay) values(?,?,?,?,?,?)",
+                    [c_user_id, c_user_name, c_user_imgsrc, c_user_count, c_user_price, total],
                     (err, rows, fields)=>{
                         res.send(rows);
                     }
